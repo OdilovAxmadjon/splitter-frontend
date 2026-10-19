@@ -405,7 +405,7 @@ export default function ItemsSplitScreen() {
           if (owners.includes(participant.uniqueId) && owners.length > 0) {
             assignedItems.push({
               id: item.id,
-              label: item.quantity > 1 ? `${item.name} × 1` : item.name,
+              label: owners.length > 1 ? `${item.name} (shared equally)` : item.name,
               amount: computeItemTotal(item) / owners.length,
             });
           }
