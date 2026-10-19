@@ -382,6 +382,52 @@ export default function ItemsSplitScreen() {
   const totalItems = items.length;
   const canContinue = assignedCount === totalItems && totalItems > 0;
 
+  // Live participant-by-participant preview of the current item assignments.
+  const participantOrderSummaries = useMemo(
+    () =>
+      participants.map((participant) => {
+        const assignedItems: Array<{ id: string; label: string; amount: number }> = [];
+
+        for (const item of items) {
+          if (ensureMode(item) === 'count') {
+            const count = Number(item.perPersonCount?.[participant.uniqueId] ?? 0);
+            if (count > 0) {
+              assignedItems.push({
+                id: item.id,
+                label: `${item.name} × ${count}`,
+                amount: count * item.price,
+              });
+            }
+            continue;
+          }
+
+          const owners = (item.assignedTo ?? []).filter(Boolean);
+          if (owners.includes(participant.uniqueId) && owners.length > 0) {
+            assignedItems.push({
+              id: item.id,
+              label: item.quantity > 1 ? `${item.name} × 1` : item.name,
+              amount: computeItemTotal(item) / owners.length,
+            });
+          }
+        }
+
+        return {
+          ...participant,
+          assignedItems,
+          total: assignedItems.reduce((sum, entry) => sum + entry.amount, 0),
+        };
+      }),
+    [items, participants]
+  );
+
+  const fmtExactCurrency = useCallback(
+    (amount: number) =>
+      `${storeCurrency || 'UZS'} ${Number(amount.toFixed(2)).toLocaleString('en-US', {
+        maximumFractionDigits: 2,
+      })}`,
+    [storeCurrency]
+  );
+
   useEffect(() => {
     if (!canContinue && submitError) {
       setSubmitError(null);
@@ -825,6 +871,52 @@ export default function ItemsSplitScreen() {
                 ))}
               </XStack>
             </ScrollView>
+          </YStack>
+
+          {/* Live order board */}
+          <YStack gap="$2" mt="$2" p="$3" borderWidth={1} borderColor="$gray5" borderRadius={12} bg="$color1">
+            <XStack ai="center" jc="space-between" mb="$1">
+              <Text fontSize={16} fontWeight="700">Who ordered what?</Text>
+              <Text fontSize={12} color="$gray10">Live split preview</Text>
+            </XStack>
+            {participantOrderSummaries.map((summary) => (
+              <YStack
+                key={summary.uniqueId}
+                p="$2"
+                borderWidth={1}
+                borderColor="$gray4"
+                borderRadius={10}
+                gap="$1"
+              >
+                <XStack ai="center" jc="space-between" gap="$2">
+                  <XStack ai="center" gap="$2" f={1}>
+                    <Avatar name={summary.username} />
+                    <Text fontWeight="700" numberOfLines={1} f={1}>{summary.username}</Text>
+                  </XStack>
+                  <Text fontWeight="700" color="#2ECC71">
+                    {fmtExactCurrency(summary.total)}
+                  </Text>
+                </XStack>
+                {summary.assignedItems.length > 0 ? (
+                  <YStack pl={38} gap="$1">
+                    {summary.assignedItems.map((entry) => (
+                      <XStack key={entry.id} ai="center" jc="space-between" gap="$2">
+                        <Text f={1} fontSize={13} color="$gray11" numberOfLines={1}>
+                          {entry.label}
+                        </Text>
+                        <Text fontSize={13} color="$gray11">
+                          {fmtExactCurrency(entry.amount)}
+                        </Text>
+                      </XStack>
+                    ))}
+                  </YStack>
+                ) : (
+                  <Text pl={38} fontSize={13} color="$gray10">
+                    No items assigned yet
+                  </Text>
+                )}
+              </YStack>
+            ))}
           </YStack>
 
           {/* Items */}
