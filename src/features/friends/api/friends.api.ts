@@ -37,9 +37,10 @@ export const FriendsApi = {
     return ZRequestsPayload.parse(data)
   },
 
-  /** GET /friends/search?q=USER#1234 — поиск по uniqueId */
+  /** GET /friends/search?q=#1234 — поиск по uniqueId */
   async search(q: string) {
-    const { data } = await apiClient.get('/friends/search', { params: { q } })
+    const normalized = q.trim().replace(/^@/, '').replace(/^user(?=#)/i, '');
+    const { data } = await apiClient.get('/friends/search', { params: { q: normalized } })
     return z.array(ZUserLoose).parse(data)
   },
 

@@ -312,7 +312,7 @@ export default function FriendsRequestsUnified() {
           w={LIST_W}
           value={query}
           onChangeText={setQuery}
-          placeholder={t('friends.search.placeholder', 'Enter uniqueId, e.g. USER#1234')}
+          placeholder={t('friends.search.placeholder', 'Enter unique ID, e.g. #5189')}
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="search"

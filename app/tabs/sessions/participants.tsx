@@ -208,7 +208,8 @@ export default function SessionParticipantsScreen() {
   };
 
   const selectedList = Object.keys(selected).filter(k => selected[k]);
-  const canNext = selectedList.length >= 2;
+  // A receipt can be reviewed even when the current user is the only participant.
+  const canNext = selectedList.length >= 1;
 
   const fmtUid = (uid: string) => `@${uid.toLowerCase().replace('user#', 'user')}`;
   const goNext = () => {
