@@ -137,7 +137,7 @@ export default function FriendsSearchScreen() {
           f={1}
           value={query}
           onChangeText={setQuery}
-          placeholder={t('friends.search.placeholder', 'Enter uniqueId, e.g. USER#1234')}
+          placeholder={t('friends.search.placeholder', 'Enter ID, e.g. #5189')}
           autoCapitalize="none"
           autoCorrect={false}
           onSubmitEditing={onSubmit}
